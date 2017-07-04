@@ -41,17 +41,14 @@ module Amorail
       response
     end
 
-    def safe_request(method, url, params = {})
-      send(method, url, params)
+    def safe_request(method, url, params = {}, headers={})
+      send(method, url, params, headers)
     rescue ::Amorail::AmoUnauthorizedError
       authorize
-      send(method, url, params)
+      send(method, url, params, headers)
     end
 
-    def get(url, params_in = {})
-      headers = params_in[:headers]
-      params  = params_in.clone
-      params.delete(:headers)      
+    def get(url, params = {}, headers={})
       response = connect.get(url, params) do |request|
         request.headers['Cookie'] = cookies if cookies.present?
         headers&.each { |k, v| request.headers[k.to_s] = v.to_s }
@@ -59,10 +56,7 @@ module Amorail
       handle_response(response)
     end
 
-    def post(url, params_in = {})
-      headers = params_in[:headers]
-      params  = params_in.clone
-      params.delete(:headers)
+    def post(url, params = {}, headers={})
       response = connect.post(url) do |request|
         request.headers['Cookie'] = cookies if cookies.present?
         request.headers['Content-Type'] = 'application/json'
